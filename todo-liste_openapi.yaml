@@ -1,0 +1,239 @@
+openapi: 3.0.3
+info:
+  title: ToDo-Liste - OpenAPI 3.0
+  description: API für eine ToDo-Liste
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:5000/
+tags:
+  - name: ToDo-Liste
+    description: Server für ToDo-Listen-API
+paths:
+  /todo-list/{list_id}:
+    get:
+      tags:
+        - get list
+      summary: GET
+      description: Liefert alle Einträge einer Todo-Liste zurück.
+      parameters:
+        - in: path
+          name: list_id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: GET-Parameter
+      responses:
+        '200':
+          description: Einträge wurden erfolgreich geladen
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                    $ref: '#/components/schemas/Entry'
+                
+        '404':
+          description: Liste mit übergebener Id nicht gefunden
+    delete:
+      tags:
+        - delete list
+      summary: DELETE
+      description: Löscht eine komplette Todo-Liste mit allen Einträgen.
+      parameters:
+        - in: path
+          name: list_id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: GET-Parameter
+      responses:
+        '200':
+          description: Liste wurde erfolgreich gelöscht
+        '404':
+          description: Liste mit übergebener Id nicht gefunden
+        '500':
+          description: Es ist ein Fehler beim löschen der Liste aufgetreten
+    patch:
+      tags:
+        - update list
+      summary: PATCH
+      description: Aktualisiert den Namen einer bestehenden Todo-Liste.
+      parameters:
+        - in: path
+          name: list_id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: GET-Parameter
+      requestBody:
+        description: Neuer Name der Liste
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestList'
+      responses:
+        '200':
+          description: Liste wurde erfolgreich aktualisiert
+        '404':
+          description: Liste mit übergebener Id nicht gefunden
+        '500':
+          description: Es ist ein Fehler beim aktualisieren der Liste aufgetreten
+  /todo-list:
+    get:
+      tags:
+        - get all lists
+      summary: GET
+      description: Liefert alle Todo-Listen zurück.
+      responses:
+        '200':
+          description: Listen wurden erfolgreich geladen
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/List'
+    post:
+      tags:
+        - add new list
+      summary: POST
+      description: Fügt eine neue Todo-Liste hinzu.
+      requestBody:
+        description: Daten der neuen Liste
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestList'
+      responses:
+        '200':
+          description: Liste wurde erfolgreich angelegt
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/List'
+        '500':
+          description: Es ist ein Fehler beim anlegen der Liste aufgetreten
+  /todo-list/{list_id}/entry:
+    post:
+      tags:
+        - add list entry
+      summary: POST
+      description: Fügt einen Eintrag zu einer bestehenden Todo-Liste hinzu.
+      parameters:
+        - in: path
+          name: list_id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: GET-Parameter
+      requestBody:
+        description: Daten des neuen Eintrages
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestEntry'
+      responses:
+        '200':
+          description: Es wurde ein neuer Eintrag zur Liste hinzugefügt
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Entry'
+        '404':
+          description: Liste mit übergebener Id nicht gefunden
+        '500':
+          description: Es ist ein Fehler beim hinzufügen des Eintrages aufgetreten
+  /entry/{entry_id}:
+    patch:
+      tags:
+        - update entry
+      summary: PATCH
+      description: Aktualisiert einen bestehenden Eintrag.
+      parameters:
+        - in: path
+          name: entry_id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: GET-Parameter
+      requestBody:
+        description: Daten des Eintrages
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestEntry'
+      responses:
+        '200':
+          description: Eintrag wurde erfolgreich aktualisiert
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Entry'
+        '404':
+          description: Eintrag mit übergebener Id nicht gefunden
+        '500':
+          description: Es ist ein Fehler beim aktualisieren des Eintrages aufgetreten
+    delete:
+      tags:
+        - delete entry
+      summary: DELETE
+      description: Löscht einen einzelnen Eintrag einer Todo-Liste.
+      parameters:
+        - in: path
+          name: entry_id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: GET-Parameter
+      responses:
+        '200':
+          description: Eintrag wurde erfolgreich gelöscht
+        '404':
+          description: Eintrag mit übergebener Id nicht gefunden
+        '500':
+          description: Es ist ein Fehler beim löschen des Eintrages aufgetreten
+components:
+  schemas:
+    List:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+    RequestList:
+      type: object
+      properties:
+        name:
+          type: string
+    Entry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        list_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        content:
+          type: string
+    RequestEntry:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
